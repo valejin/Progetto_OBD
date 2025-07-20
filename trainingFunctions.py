@@ -1,4 +1,5 @@
 import numpy as np
+import random
 
 from activationFunctions import *
 from config import *
@@ -90,3 +91,16 @@ def backpropagation(phi, Y, W, b, g, all_activations, m):
         grads.append(db_l.flatten())
     
     return np.concatenate(grads)
+
+# neurons è un vettore che contiene il numero di neuroni per ciascun livello;  dim(neurons) = num_levels
+def weight_initializer(neurons):
+
+    W = []
+    b = []
+
+    #costruzione delle matrici W per ogni livello, fissato vettore dei neuroni
+    for l in range(len(neurons) - 1):
+        W.append(np.random.randn(neurons[l+1], neurons[l]) * np.sqrt(2. / neurons[l])) #usiamo He initilization; POI DA FARE ANCHE CON XAVIER PER TANH
+        b.append(np.zeros((neurons[l+1],)))
+
+    return W, b

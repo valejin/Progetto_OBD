@@ -22,6 +22,7 @@ def relu(Z):
 
 def softmax(Z):
 
+    Z = Z - np.max(Z)  # sottrai il max per stabilizzare l'esponenziale
     exp_Z = np.exp(Z)
     A = exp_Z / np.sum(exp_Z)
 

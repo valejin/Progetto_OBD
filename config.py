@@ -7,4 +7,4 @@ HIDDEN_LAYERS_LIST = [2, 3, 4]
 
 
 # numero di strati nascosti
-L = 1 
+L = 2 

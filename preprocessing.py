@@ -1,10 +1,12 @@
 import matplotlib.pyplot as plt
+import numpy as np
+
 from sklearn.model_selection import train_test_split
 
 def preprocess_data(dataset, label_name):
 
     dataset = dataset.sample(frac=1).reset_index(drop=True)
-    
+
     #Separa le feature dalle label nel dataset
     X = dataset.drop(columns = [label_name], axis = 1)
     Y = dataset[label_name]
@@ -18,14 +20,10 @@ def preprocess_data(dataset, label_name):
             X[column] = (X[column] - X[column].mean()) / X[column].std()
 
     #Separiamo il dataset in training set, validation set e test set
-    X_train, X_temp, Y_train, Y_temp = train_test_split(
-        X, Y, test_size=0.4, stratify=Y, random_state=42
+    X_train, X_test, Y_train, Y_test = train_test_split(
+        X, Y, test_size=0.2, stratify=Y, random_state=42
     )
 
-    X_val, X_test, Y_val, Y_test = train_test_split(
-        X_temp, Y_temp, test_size=0.2, stratify=Y_temp, random_state=42
-    )
-
-    return X_train, Y_train, X_val, Y_val, X_test, Y_test
+    return X_train.to_numpy(), Y_train.to_numpy(), X_test.to_numpy(), Y_test.to_numpy()
 
     
