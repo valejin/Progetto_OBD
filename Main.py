@@ -24,7 +24,7 @@ def main():
 
     m = dataset.shape[0] #numero di campioni del dataset
     
-    """ print('MO LO PROVIAMO A CASO')
+    print('MO LO PROVIAMO A CASO')
 
     # Numero esempi
     m = 2
@@ -34,6 +34,14 @@ def main():
         [1.0, 0.0, 0.0],  # esempio 1
         [0.0, 1.0, 1.0]   # esempio 2
     ])
+
+    Y = np.array([1, 1])  # Etichette (classe 1 per entrambi)
+    num_classes = 3       # Numero di classi totali
+
+    # One-hot encoding dinamico
+    Y_one_hot = np.eye(num_classes)[Y]
+
+    print(Y_one_hot)
 
     # Architettura: 1 hidden layer (4 neuroni), 1 output layer (3 classi)
     # Pesi e bias
@@ -51,9 +59,18 @@ def main():
         np.zeros((3,))       # Bias per output layer
     ]   
 
-    labels = forward_pass(X, W, b, 'relu', m)
+    phi, labels, activations = forward_pass(X, W, b, 'relu', m)
     print("Predicted labels:", labels)
- """
+    print("Phi:", phi)
+
+    grads = backpropagation(phi, Y_one_hot, W, b, 'relu', activations, m)
+
+    print(grads)
+
+"""     for i, activations in enumerate(activations):
+        print(f"\nEsempio {i}:")
+        for l, a in enumerate(activations):
+            print(f"  Layer {l} (a^{l}): {a}") """
 
 
 def print_menu(message):

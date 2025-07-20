@@ -26,3 +26,18 @@ def softmax(Z):
     A = exp_Z / np.sum(exp_Z)
 
     return A
+
+
+def relu_derivative(Z):
+    
+    return (Z > 0).astype(float)
+
+def tanh_derivative(Z):
+    
+    return 1.0 - np.tanh(Z)**2
+
+
+def sigmoid_derivative(Z):
+    
+    s = sigmoid(Z)
+    return s * (1 - s)
