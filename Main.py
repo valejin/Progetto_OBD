@@ -32,13 +32,33 @@ def main():
 
     W, b = weight_initializer(neurons)
 
-    phi, labels, activations = forward_pass(X_train, W, b, 'relu', m)
+    num_batches = int(np.ceil(m / MINI_BATCH_SIZE))
+    for epoch in range(NUM_EPOCHS):
+        idx = np.random.permutation(m)
+        for batch in range(num_batches):
+            batch_idx = idx[batch*MINI_BATCH_SIZE : (batch+1)*MINI_BATCH_SIZE]
+            X_batch = X_train[batch_idx]
+            Y_batch = Y_one_hot[batch_idx]
+
+            # forward, backprop e aggiornamento
+            phi, labels, activations = forward_pass(X_batch, W, b, 'relu', len(X_batch))
+            #print("Predicted labels:", labels)
+            #print("Phi:", phi)
+
+            dW, db = backpropagation(phi, Y_batch, W, b, 'relu', activations, len(X_batch))
+
+            W, b = stochastic_gradient(dW, db, W, b)
+
+    phi, labels, activations = forward_pass(X_train, W, b, 'relu', len(X_train))
     print("Predicted labels:", labels)
-    #print("Phi:", phi)
 
-    grads = backpropagation(phi, Y_one_hot, W, b, 'relu', activations, m)
+    error = labels - Y_train
+    print(error)
 
-    print(grads)
+    phi, labels, activations = forward_pass(X_test, W, b, 'relu', len(X_test))
+    print("Predicted labels:", labels)
+    error = labels - Y_test
+    print(error)
 
 
 def print_menu(message):

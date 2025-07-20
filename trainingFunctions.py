@@ -82,15 +82,8 @@ def backpropagation(phi, Y, W, b, g, all_activations, m):
     # Media sui batch
     dW = [dw / m for dw in dW]
     db = [db_l / m for db_l in db]
-
-    # Compattiamo la derivata del rischio empirico
-    grads = []
-
-    for dw, db_l in zip(dW, db):
-        grads.append(dw.flatten())
-        grads.append(db_l.flatten())
     
-    return np.concatenate(grads)
+    return dW, db
 
 # neurons è un vettore che contiene il numero di neuroni per ciascun livello;  dim(neurons) = num_levels
 def weight_initializer(neurons):
@@ -102,5 +95,15 @@ def weight_initializer(neurons):
     for l in range(len(neurons) - 1):
         W.append(np.random.randn(neurons[l+1], neurons[l]) * np.sqrt(2. / neurons[l])) #usiamo He initilization; POI DA FARE ANCHE CON XAVIER PER TANH
         b.append(np.zeros((neurons[l+1],)))
+
+    return W, b
+
+def stochastic_gradient(dW, db, W, b):
+
+    alfa = 0.001
+
+    for l in range(len(W)):
+        W[l] -= alfa * dW[l]
+        b[l] -= alfa * db[l]
 
     return W, b

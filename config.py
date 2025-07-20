@@ -8,3 +8,6 @@ HIDDEN_LAYERS_LIST = [2, 3, 4]
 
 # numero di strati nascosti
 L = 2 
+
+MINI_BATCH_SIZE = 32
+NUM_EPOCHS = 10
