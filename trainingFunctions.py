@@ -40,11 +40,6 @@ def forward_pass(X, W, b, g, m):
 
     return phi, phi_label, all_activations
 
-def backpropagation(phi, Y, a, g, W):
-
-
-    return
-
 def backpropagation(phi, Y, W, b, g, all_activations, m):
 
     # Scegli attivazione e derivata
