@@ -5,6 +5,7 @@ import numpy as np
 
 from preprocessing import *
 from trainingFunctions import *
+from modelEvaluation import *
 
 def main():
     print('BENVENUTO!\n\n')
@@ -32,6 +33,9 @@ def main():
 
     W, b = weight_initializer(neurons)
 
+    vW = [np.zeros_like(w) for w in W]
+    vb = [np.zeros_like(bias) for bias in b]
+
     num_batches = int(np.ceil(m / MINI_BATCH_SIZE))
     for epoch in range(NUM_EPOCHS):
         idx = np.random.permutation(m)
@@ -44,10 +48,9 @@ def main():
             phi, labels, activations = forward_pass(X_batch, W, b, 'relu', len(X_batch))
             #print("Predicted labels:", labels)
             #print("Phi:", phi)
-
             dW, db = backpropagation(phi, Y_batch, W, b, 'relu', activations, len(X_batch))
 
-            W, b = stochastic_gradient(dW, db, W, b)
+            W, b, vW, vb = stochastic_gradient_with_momentum(dW, db, W, b, vW, vb)
 
     phi, labels, activations = forward_pass(X_train, W, b, 'relu', len(X_train))
     print("Predicted labels:", labels)
@@ -59,6 +62,7 @@ def main():
     print("Predicted labels:", labels)
     error = labels - Y_test
     print(error)
+    print(evaluate_model(labels, Y_test))
 
 
 def print_menu(message):
