@@ -132,7 +132,7 @@ def general_weight_initializer(neurons, activation, method):
 
 def stochastic_gradient_with_momentum(dW, db, W, b, vW, vb):
 
-    alfa = 0.001
+    alfa = 0.01
     beta = 0.9
 
     for l in range(len(W)):

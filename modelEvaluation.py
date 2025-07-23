@@ -3,7 +3,6 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-#SUPPONIAMO CHE ABBIAMO SOLO CLASSIFICAZIONE BINARIA
 def evaluate_model(phi_label, y):
 
     #Confronto elemento per elemento e conteggio degli uguali
@@ -36,6 +35,11 @@ def evaluate_model(phi_label, y):
     for i, (p, r, f) in enumerate(zip(precision, recall, f1)):
         print(f"Classe {i} -> Precision: {p:.2f}, Recall: {r:.2f}, F1-score: {f:.2f}")
 
+    
+    return accuracy, precision, recall, f1
+
+
+def show_confusion_matrix(phi_label, y):
     # Visualizza la confusion matrix
     cm = confusion_matrix(y, phi_label)
 
@@ -47,8 +51,17 @@ def evaluate_model(phi_label, y):
     plt.savefig("./plots/evaluation/confusion_matrix.png", dpi=300, bbox_inches='tight')  
     plt.show()
 
-
-    return accuracy, precision, recall, f1
+    
+# Plot della metrica rispetto all'epoca
+def plot(metric_per_epoch, metric):
+    plt.figure(figsize=(8, 5))
+    plt.plot(range(1, len(metric_per_epoch) + 1), metric_per_epoch, marker='o')
+    plt.xlabel("Epoche")
+    plt.ylabel(metric)
+    plt.title("Andamento di " + metric + " durante il training")
+    plt.grid(True)
+    plt.tight_layout()
+    plt.show()
 
 
 # DA SISTEMARE, NON FUNZIONA
