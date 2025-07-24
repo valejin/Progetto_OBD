@@ -30,7 +30,15 @@ from collections import Counter
     return X_train.to_numpy(), Y_train.to_numpy(), X_test.to_numpy(), Y_test.to_numpy()
 '''
 
-def preprocess_data(dataset, label_name, test_size=0.2, random_state=42):
+def preprocess_data(dataset, dataset_choice, label_name, test_size=0.2, random_state=42):
+
+    if(dataset_choice == '2'):
+        # Rimuove la colonna ID
+        dataset = dataset.drop(columns=["ID"])
+        # Trasforma la colonna 'class': P -> 1, altro -> 0
+        dataset['class'] = dataset['class'].apply(lambda x: 1 if x == 'P' else 0)
+    elif(dataset_choice == '3'):
+        dataset['Target'] = dataset['Target'].apply(lambda x: 1 if x == 'Graduate' else 0)
 
     # Rimuove righe con valori mancanti (sia in X che Y)
     dataset = dataset.dropna(axis=0).reset_index(drop=True)

@@ -11,7 +11,7 @@ from crossValidation import *
 def main():
     print('BENVENUTO!\n\n')
     
-    dataset_choice = print_menu('Dataset disponibili:\n\n[1] Glioma Grading (839 campioni)\n[2] TUNANDROM\n')
+    dataset_choice = print_menu('Dataset disponibili:\n\n[1] Glioma Grading (839 campioni)\n[2] DARWIN (174 campioni)\n[3] Academic Dropout (4424 campioni)\n')
 
     activation_choice = print_menu('Funzioni di attivazione disponibili:\n[1] ReLU\n[2] Tanh\n')
 
@@ -20,11 +20,18 @@ def main():
     if(dataset_choice == '1'):
         dataset = pd.read_csv('./datasets/TCGA_InfoWithGrade.csv')
         num_classes = 2
-        X_train, Y_train, X_test, Y_test = preprocess_data(dataset, "Grade")
+        X_train, Y_train, X_test, Y_test = preprocess_data(dataset, dataset_choice, "Grade")
+        n_features = dataset.shape[1] - 1
     elif(dataset_choice == '2'):
-        dataset = pd.read_csv('./datasets/TUANDROMD.csv')
+        dataset = pd.read_csv('./datasets/DARWIN.csv')
         num_classes = 2
-        X_train, Y_train, X_test, Y_test = preprocess_data(dataset, "Label")
+        X_train, Y_train, X_test, Y_test = preprocess_data(dataset, dataset_choice, "class")
+        n_features = dataset.shape[1] - 2
+    elif(dataset_choice == '3'):
+        dataset = pd.read_csv('./datasets/academicDropout.csv')
+        num_classes = 2
+        X_train, Y_train, X_test, Y_test = preprocess_data(dataset, dataset_choice, "Target")
+        n_features = dataset.shape[1] - 1
 
     if(activation_choice == '1'):
         activation_function = "relu"
@@ -36,7 +43,6 @@ def main():
     print('Forma del dataset: %s' % (str(dataset.shape)))
 
     m = len(X_train) #numero di campioni del training set
-    n_features = dataset.shape[1] - 1
 
     # neurons = [n_features, 10, 12, num_classes]
     neurons = [n_features, 16, 32, 64, num_classes]
