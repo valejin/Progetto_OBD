@@ -1,7 +1,10 @@
 import numpy as np
+import copy
+
 from config import *
 from trainingFunctions import *
 from modelEvaluation import *
+from itertools import combinations
 
 def k_fold_division(X, Y, k=5):
     
@@ -52,64 +55,74 @@ def manual_stratified_k_fold(X, Y, k=5, seed=42):
     return folds
 
 
-def cross_validation(X, Y, num_classes, inizialization, neurons, activation_function):
+def cross_validation(X, Y, n_features, num_classes, inizialization, activation_function):
     
-    folds = k_fold_division(X, Y, k=5)
+    folds = manual_stratified_k_fold(X, Y, k=5)
+    neurons_combinations = [list(c) for c in combinations(HIDDEN_LAYER_NEURONS_LIST, L)]
 
+    all_models = []
     all_mean_acc = []
 
-    for lambd in LAMBDA_VALUES_LIST:
-        val_accuracies = []
+    for comb in neurons_combinations:
 
-        for train_idx, val_idx in folds:
-            X_train, Y_train = X[train_idx], Y[train_idx]
-            X_val, Y_val = X[val_idx], Y[val_idx]
+        neurons = [n_features] + comb + [num_classes]
+        
+        for lambd in LAMBDA_VALUES_LIST:
 
-            Y_one_hot = np.eye(num_classes)[Y_train]
+            val_accuracies = []
 
-            # Inizializzazione dei pesi e momenti
-            W, b = general_weight_initializer(neurons, inizialization)
+            all_models.append((copy.deepcopy(neurons), lambd))
 
-            vW = [np.zeros_like(w) for w in W]
-            vb = [np.zeros_like(bi) for bi in b]
+            for train_idx, val_idx in folds:
+                X_train, Y_train = X[train_idx], Y[train_idx]
+                X_val, Y_val = X[val_idx], Y[val_idx]
 
-            num_batches = int(np.ceil(len(X_train) / MINI_BATCH_SIZE))
+                Y_one_hot = np.eye(num_classes)[Y_train]
 
-            k = 1
-            loss_prev = float('inf')
+                # Inizializzazione dei pesi e momenti
+                W, b = general_weight_initializer(neurons, inizialization)
 
-            # === Training loop ===
-            for epoch in range(NUM_EPOCHS):
-                idx = np.random.permutation(len(X_train))
-                for batch in range(num_batches):
-                    batch_idx = idx[batch*MINI_BATCH_SIZE : (batch+1)*MINI_BATCH_SIZE]
-                    X_batch = X_train[batch_idx]
-                    Y_batch = Y_one_hot[batch_idx]
+                vW = [np.zeros_like(w) for w in W]
+                vb = [np.zeros_like(bi) for bi in b]
 
-                    phi, labels, activations = forward_pass(X_batch, W, b, activation_function, len(X_batch))
+                num_batches = int(np.ceil(len(X_train) / MINI_BATCH_SIZE))
 
-                    loss_curr = compute_loss(phi, Y_batch, W, lambd)
+                k = 1
+                loss_prev = float('inf')
+
+                # === Training loop ===
+                for epoch in range(NUM_EPOCHS):
+                    idx = np.random.permutation(len(X_train))
+                    for batch in range(num_batches):
+                        batch_idx = idx[batch*MINI_BATCH_SIZE : (batch+1)*MINI_BATCH_SIZE]
+                        X_batch = X_train[batch_idx]
+                        Y_batch = Y_one_hot[batch_idx]
+
+                        phi, labels, activations = forward_pass(X_batch, W, b, activation_function, len(X_batch))
+
+                        loss_curr = compute_loss(phi, Y_batch, W, lambd)
 
 
-                    dW, db = backpropagation(phi, Y_batch, W, b, activation_function, activations, len(X_batch))
-                    W, b, vW, vb = stochastic_gradient_with_momentum(dW, db, W, b, vW, vb, lambd, k, loss_prev, loss_curr)
+                        dW, db = backpropagation(phi, Y_batch, W, b, activation_function, activations, len(X_batch))
+                        W, b, vW, vb = stochastic_gradient_with_momentum(dW, db, W, b, vW, vb, lambd, k, loss_prev, loss_curr)
 
-                    k += 1
-                    loss_prev = loss_curr
+                        k += 1
+                        loss_prev = loss_curr
 
-            # === Validation ===
-            phi_val, labels_val, _ = forward_pass(X_val, W, b, activation_function, len(X_val))
-            acc, _, _, _ = evaluate_model(labels_val, Y_val)
-            val_accuracies.append(acc)
+                # === Validation ===
+                phi_val, labels_val, _ = forward_pass(X_val, W, b, activation_function, len(X_val))
+                acc, _, _, _ = evaluate_model(labels_val, Y_val)
+                val_accuracies.append(acc)
 
-        # Media delle performance su tutti i fold per questo lambda
-        print(f"λ={lambd} -> accuracy media: {np.mean(val_accuracies)}")
+            # Media delle performance su tutti i fold per questo lambda
+            print("\nModello: ", neurons)
+            print(f"λ={lambd} -> accuracy media: {np.mean(val_accuracies)}")
 
-        all_mean_acc.append(np.mean(val_accuracies))
+            all_mean_acc.append(np.mean(val_accuracies))
 
-    plot_lambda_vs_accuracy(LAMBDA_VALUES_LIST, all_mean_acc)
+    #plot_lambda_vs_accuracy(LAMBDA_VALUES_LIST, all_mean_acc)
 
-    return np.argmax(all_mean_acc)
+    return all_models[np.argmax(all_mean_acc)]
 
 
 def plot_lambda_vs_accuracy(lambda_values, accuracies):

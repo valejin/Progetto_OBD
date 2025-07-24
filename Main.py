@@ -43,15 +43,11 @@ def main():
     print('Forma del dataset: %s' % (str(dataset.shape)))
 
     m = len(X_train) #numero di campioni del training set
-
-    # neurons = [n_features, 10, 12, num_classes]
-    neurons = [n_features, 16, 32, 64, num_classes]
     
-    index_lambda = cross_validation(X_train, Y_train, num_classes, inizialization, neurons, activation_function)
-
-    best_lambda = LAMBDA_VALUES_LIST[index_lambda]
-
-    print(best_lambda)
+    best_model = cross_validation(X_train, Y_train, n_features, num_classes, inizialization, activation_function)
+    neurons = best_model[0]
+    best_lambda = best_model[1]
+    print("\nIl modello migliore è stato: ", best_model)
 
     # One-hot encoding dinamico
     Y_one_hot = np.eye(num_classes)[Y_train]
