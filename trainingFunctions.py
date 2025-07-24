@@ -101,7 +101,7 @@ def weight_initializer(neurons):
     return W, b
 
 #Versione generale per inizializazione dei pesi
-def general_weight_initializer(neurons, activation, method):
+def general_weight_initializer(neurons, method):
     W = []
     b = []
 
@@ -113,16 +113,6 @@ def general_weight_initializer(neurons, activation, method):
             W.append(np.random.randn(n_out, n_in) * np.sqrt(2. / n_in))
         elif method == 'xavier':
             W.append(np.random.randn(n_out, n_in) * np.sqrt(1. / n_in))
-        elif method == 'xavier_uniform':
-            limit = np.sqrt(6. / (n_in + n_out))
-            W.append(np.random.uniform(-limit, limit, (n_out, n_in)))
-        elif method == 'lecun':
-            W.append(np.random.randn(n_out, n_in) * np.sqrt(1. / n_in))
-        elif method == 'orthogonal':
-            a = np.random.randn(n_out, n_in)
-            q, _ = np.linalg.qr(a)
-            gain = np.sqrt(2.) if activation == 'relu' else 1.
-            W.append(q * gain)
         else:
             raise ValueError(f"Metodo '{method}' non supportato.")
 
@@ -130,13 +120,13 @@ def general_weight_initializer(neurons, activation, method):
 
     return W, b
 
-def stochastic_gradient_with_momentum(dW, db, W, b, vW, vb):
+def stochastic_gradient_with_momentum(dW, db, W, b, vW, vb, lam):
 
     alfa = 0.001
     beta = 0.9
 
     for l in range(len(W)):
-        vW[l] = beta * vW[l] - alfa * dW[l]
+        vW[l] = beta * vW[l] - alfa * (dW[l] + 2*lam* W[l])
         vb[l] = beta * vb[l] - alfa * db[l]
 
         W[l] += vW[l]

@@ -6,11 +6,14 @@ import numpy as np
 from preprocessing import *
 from trainingFunctions import *
 from modelEvaluation import *
+from crossValidation import *
 
 def main():
     print('BENVENUTO!\n\n')
     
-    dataset_choice = print_menu('Dataset disponibili:\n\n[1] Glioma Grading\n[2] TUNANDROM\n')
+    dataset_choice = print_menu('Dataset disponibili:\n\n[1] Glioma Grading (839 campioni)\n[2] TUNANDROM\n')
+
+    activation_choice = print_menu('Funzioni di attivazione disponibili:\n[1] ReLU\n[2] Tanh\n')
 
     print('\nHai scelto il dataset ' + dataset_choice)
 
@@ -23,18 +26,33 @@ def main():
         num_classes = 2
         X_train, Y_train, X_test, Y_test = preprocess_data(dataset, "Label")
 
+    if(activation_choice == '1'):
+        activation_function = "relu"
+        inizialization = "he"
+    elif(activation_choice == '2'):
+        activation_function = "tanh"
+        inizialization = "xavier"
+
     print('Forma del dataset: %s' % (str(dataset.shape)))
 
     m = len(X_train) #numero di campioni del training set
     n_features = dataset.shape[1] - 1
 
+    neurons = [n_features, 16, 32, 64, num_classes]
+    
+    index_lambda = cross_validation(X_train, Y_train, num_classes, inizialization, neurons, activation_function)
+
+    best_lambda = LAMBDA_VALUES_LIST[index_lambda]
+
+    print(best_lambda)
+
     # One-hot encoding dinamico
-    Y_one_hot = np.eye(num_classes)[Y_train]
+    """ Y_one_hot = np.eye(num_classes)[Y_train]
 
     # neurons = [n_features, 10, 12, num_classes]
     neurons = [n_features, 16, 32, 64, num_classes]
 
-    W, b = weight_initializer(neurons)
+    W, b = general_weight_initializer(neurons, inizialization)
 
     vW = [np.zeros_like(w) for w in W]
     vb = [np.zeros_like(bias) for bias in b]
@@ -50,14 +68,14 @@ def main():
             Y_batch = Y_one_hot[batch_idx]
 
             # forward, backprop e aggiornamento
-            phi, labels, activations = forward_pass(X_batch, W, b, 'relu', len(X_batch))
+            phi, labels, activations = forward_pass(X_batch, W, b, activation_function, len(X_batch))
             
-            dW, db = backpropagation(phi, Y_batch, W, b, 'relu', activations, len(X_batch))
+            dW, db = backpropagation(phi, Y_batch, W, b, activation_function, activations, len(X_batch))
 
-            W, b, vW, vb = stochastic_gradient_with_momentum(dW, db, W, b, vW, vb)
+            W, b, vW, vb = stochastic_gradient_with_momentum(dW, db, W, b, vW, vb, 0.1)
             
         #Facciamo una forward pass così da poter valutare l'andamento dell'accuratezza durante le epoche
-        phi, labels, activations = forward_pass(X_train, W, b, 'relu', len(X_train))
+        phi, labels, activations = forward_pass(X_train, W, b, activation_function, len(X_train))
         accuracy, precision, recall, f1 = evaluate_model(labels, Y_train)
         accuracy_per_epoch.append(accuracy)
 
@@ -66,9 +84,8 @@ def main():
     
     # Valutazione modello sul test set
     print("PRESTAZIONI SU TEST SET\n")
-    phi, labels, activations = forward_pass(X_test, W, b, 'relu', len(X_test))
-    accuracy, precision, recall, f1 = evaluate_model(labels, Y_test)
-
+    phi, labels, activations = forward_pass(X_test, W, b, activation_function, len(X_test))
+    accuracy, precision, recall, f1 = evaluate_model(labels, Y_test) """
 
 
 def print_menu(message):
