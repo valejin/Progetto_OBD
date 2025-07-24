@@ -120,10 +120,15 @@ def general_weight_initializer(neurons, method):
 
     return W, b
 
-def stochastic_gradient_with_momentum(dW, db, W, b, vW, vb, lam):
+def stochastic_gradient_with_momentum(dW, db, W, b, vW, vb, lam, k, loss_prev, loss_curr, epsilon=1e-4, alfa_init=0.001):
 
-    alfa = 0.001
     beta = 0.9
+
+    # Confronta la variazione della loss
+    if abs(loss_curr - loss_prev) < epsilon:
+        alfa = 1 / k  # diminishing stepsize
+    else:
+        alfa = alfa_init      # costante finché loss migliora abbastanza
 
     for l in range(len(W)):
         vW[l] = beta * vW[l] - alfa * (dW[l] + 2*lam* W[l])
@@ -133,3 +138,29 @@ def stochastic_gradient_with_momentum(dW, db, W, b, vW, vb, lam):
         b[l] += vb[l]
 
     return W, b, vW, vb
+
+
+def compute_loss(phi, Y_true, W, lam):
+    """
+    Calcola la cross-entropy loss con regolarizzazione L2.
+    
+    phi: output softmax della rete, shape (batch_size, num_classes)
+    Y_true: one-hot labels, shape (batch_size, num_classes)
+    W: lista dei pesi per ciascun layer
+    lam: coefficiente di regolarizzazione (lambda)
+    """
+
+    phi = np.array(phi)
+    Y_true = np.array(Y_true)
+
+    m = Y_true.shape[0]
+    eps = 1e-8  # per evitare log(0)
+
+    # Cross-entropy loss
+    loss_ce = -np.sum(Y_true * np.log(phi + eps)) / m
+
+    # L2 regularization: somma dei quadrati di tutti i pesi
+    loss_reg = lam * sum(np.sum(w ** 2) for w in W)
+
+    # Totale
+    return loss_ce + loss_reg

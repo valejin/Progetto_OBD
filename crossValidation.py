@@ -75,6 +75,9 @@ def cross_validation(X, Y, num_classes, inizialization, neurons, activation_func
 
             num_batches = int(np.ceil(len(X_train) / MINI_BATCH_SIZE))
 
+            k = 1
+            loss_prev = float('inf')
+
             # === Training loop ===
             for epoch in range(NUM_EPOCHS):
                 idx = np.random.permutation(len(X_train))
@@ -84,8 +87,15 @@ def cross_validation(X, Y, num_classes, inizialization, neurons, activation_func
                     Y_batch = Y_one_hot[batch_idx]
 
                     phi, labels, activations = forward_pass(X_batch, W, b, activation_function, len(X_batch))
+
+                    loss_curr = compute_loss(phi, Y_batch, W, lambd)
+
+
                     dW, db = backpropagation(phi, Y_batch, W, b, activation_function, activations, len(X_batch))
-                    W, b, vW, vb = stochastic_gradient_with_momentum(dW, db, W, b, vW, vb, lambd)
+                    W, b, vW, vb = stochastic_gradient_with_momentum(dW, db, W, b, vW, vb, lambd, k, loss_prev, loss_curr)
+
+                    k += 1
+                    loss_prev = loss_curr
 
             # === Validation ===
             phi_val, labels_val, _ = forward_pass(X_val, W, b, activation_function, len(X_val))

@@ -38,6 +38,7 @@ def main():
     m = len(X_train) #numero di campioni del training set
     n_features = dataset.shape[1] - 1
 
+    # neurons = [n_features, 10, 12, num_classes]
     neurons = [n_features, 16, 32, 64, num_classes]
     
     index_lambda = cross_validation(X_train, Y_train, num_classes, inizialization, neurons, activation_function)
@@ -47,10 +48,7 @@ def main():
     print(best_lambda)
 
     # One-hot encoding dinamico
-    """ Y_one_hot = np.eye(num_classes)[Y_train]
-
-    # neurons = [n_features, 10, 12, num_classes]
-    neurons = [n_features, 16, 32, 64, num_classes]
+    Y_one_hot = np.eye(num_classes)[Y_train]
 
     W, b = general_weight_initializer(neurons, inizialization)
 
@@ -58,6 +56,9 @@ def main():
     vb = [np.zeros_like(bias) for bias in b]
 
     accuracy_per_epoch = []
+
+    k = 1
+    loss_prev = float('inf')
 
     num_batches = int(np.ceil(m / MINI_BATCH_SIZE))
     for epoch in range(NUM_EPOCHS):
@@ -69,10 +70,15 @@ def main():
 
             # forward, backprop e aggiornamento
             phi, labels, activations = forward_pass(X_batch, W, b, activation_function, len(X_batch))
+
+            loss_curr = compute_loss(phi, Y_batch, W, best_lambda)
             
             dW, db = backpropagation(phi, Y_batch, W, b, activation_function, activations, len(X_batch))
 
-            W, b, vW, vb = stochastic_gradient_with_momentum(dW, db, W, b, vW, vb, 0.1)
+            W, b, vW, vb = stochastic_gradient_with_momentum(dW, db, W, b, vW, vb, best_lambda, k, loss_prev, loss_curr)
+
+            k += 1
+            loss_prev = loss_curr
             
         #Facciamo una forward pass così da poter valutare l'andamento dell'accuratezza durante le epoche
         phi, labels, activations = forward_pass(X_train, W, b, activation_function, len(X_train))
@@ -85,7 +91,7 @@ def main():
     # Valutazione modello sul test set
     print("PRESTAZIONI SU TEST SET\n")
     phi, labels, activations = forward_pass(X_test, W, b, activation_function, len(X_test))
-    accuracy, precision, recall, f1 = evaluate_model(labels, Y_test) """
+    accuracy, precision, recall, f1 = evaluate_model(labels, Y_test)
 
 
 def print_menu(message):
