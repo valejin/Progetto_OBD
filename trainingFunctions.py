@@ -120,7 +120,7 @@ def general_weight_initializer(neurons, method):
 
     return W, b
 
-def stochastic_gradient_with_momentum(dW, db, W, b, vW, vb, lam, k, loss_prev, loss_curr, epsilon=1e-4, alfa_init=0.001):
+def stochastic_gradient_with_momentum(dW, db, W, b, vW, vb, lam, k, loss_prev, loss_curr, epsilon=1e-4, alfa_init=0.001, reg_type="l2"):
 
     beta = 0.9
 
@@ -131,7 +131,15 @@ def stochastic_gradient_with_momentum(dW, db, W, b, vW, vb, lam, k, loss_prev, l
         alfa = alfa_init      # costante finché loss migliora abbastanza
 
     for l in range(len(W)):
-        vW[l] = beta * vW[l] - alfa * (dW[l] + 2*lam* W[l])
+        
+        if reg_type == "l2":
+            reg_term = 2 * lam * W[l]
+        elif reg_type == "l1":
+            reg_term = lam * np.sign(W[l])
+        else:
+            raise ValueError("Tipo di regolarizzazione non supportato: usa 'l1' o 'l2'")
+        
+        vW[l] = beta * vW[l] - alfa * (dW[l] + reg_term)
         vb[l] = beta * vb[l] - alfa * db[l]
 
         W[l] += vW[l]

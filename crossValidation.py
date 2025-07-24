@@ -55,7 +55,7 @@ def manual_stratified_k_fold(X, Y, k=5, seed=42):
     return folds
 
 
-def cross_validation(X, Y, n_features, num_classes, inizialization, activation_function):
+def cross_validation(X, Y, n_features, num_classes, inizialization, activation_function, regularization):
     
     folds = manual_stratified_k_fold(X, Y, k=5)
     neurons_combinations = [list(c) for c in combinations(HIDDEN_LAYER_NEURONS_LIST, L)]
@@ -104,7 +104,7 @@ def cross_validation(X, Y, n_features, num_classes, inizialization, activation_f
 
 
                         dW, db = backpropagation(phi, Y_batch, W, b, activation_function, activations, len(X_batch))
-                        W, b, vW, vb = stochastic_gradient_with_momentum(dW, db, W, b, vW, vb, lambd, k, loss_prev, loss_curr)
+                        W, b, vW, vb = stochastic_gradient_with_momentum(dW, db, W, b, vW, vb, lambd, k, loss_prev, loss_curr, reg_type=regularization)
 
                         k += 1
                         loss_prev = loss_curr

@@ -15,6 +15,8 @@ def main():
 
     activation_choice = print_menu('Funzioni di attivazione disponibili:\n[1] ReLU\n[2] Tanh\n')
 
+    reg_choice = print_menu('Regolarizzazioni disponibili:\n[1] L1\n[2] L2\n')
+
     print('\nHai scelto il dataset ' + dataset_choice)
 
     if(dataset_choice == '1'):
@@ -40,11 +42,16 @@ def main():
         activation_function = "tanh"
         inizialization = "xavier"
 
+    if(reg_choice == '1'):
+        regularization = 'l1'
+    elif(reg_choice == '2'):
+        regularization = 'l2'
+
     print('Forma del dataset: %s' % (str(dataset.shape)))
 
     m = len(X_train) #numero di campioni del training set
     
-    best_model = cross_validation(X_train, Y_train, n_features, num_classes, inizialization, activation_function)
+    best_model = cross_validation(X_train, Y_train, n_features, num_classes, inizialization, activation_function, regularization)
     neurons = best_model[0]
     best_lambda = best_model[1]
     print("\nIl modello migliore è stato: ", best_model)
@@ -77,7 +84,7 @@ def main():
             
             dW, db = backpropagation(phi, Y_batch, W, b, activation_function, activations, len(X_batch))
 
-            W, b, vW, vb = stochastic_gradient_with_momentum(dW, db, W, b, vW, vb, best_lambda, k, loss_prev, loss_curr)
+            W, b, vW, vb = stochastic_gradient_with_momentum(dW, db, W, b, vW, vb, best_lambda, k, loss_prev, loss_curr, reg_type = regularization)
 
             k += 1
             loss_prev = loss_curr
@@ -91,7 +98,7 @@ def main():
     plot(accuracy_per_epoch,"accuracy")
     
     # Valutazione modello sul test set
-    print("PRESTAZIONI SU TEST SET\n")
+    print("\n\n*---- PRESTAZIONI SU TEST SET ----*\n")
     phi, labels, activations = forward_pass(X_test, W, b, activation_function, len(X_test))
     accuracy, precision, recall, f1 = evaluate_model(labels, Y_test)
 
