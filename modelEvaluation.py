@@ -31,8 +31,6 @@ def show_confusion_matrix(phi_label, y):
     plt.xlabel("Predetto")
     plt.ylabel("Reale")
     plt.title("Confusion Matrix")
-    # Salvataggio prima di mostrare
-    plt.savefig("./plots/evaluation/confusion_matrix.png", dpi=300, bbox_inches='tight')  
     plt.show()
 
     
