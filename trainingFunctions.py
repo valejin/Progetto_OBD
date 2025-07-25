@@ -4,7 +4,7 @@ import random
 from activationFunctions import *
 from config import *
 
-# X è la mtrice che contiene tutti i campioni
+# X è la matrice che contiene tutti i campioni
 # W è un tensore che contiene le matrici dei pesi
 # b è il vettore di bias
 # g è la funzione di attivazione
@@ -43,7 +43,7 @@ def forward_pass(X, W, b, g, m):
 
 def backpropagation(phi, Y, W, b, g, all_activations, m):
 
-    # Scegli attivazione e derivata
+    # scegli attivazione e derivata
     if g == 'relu':
         activation_deriv = relu_derivative
     elif g == 'tanh':
@@ -53,25 +53,21 @@ def backpropagation(phi, Y, W, b, g, all_activations, m):
     else:
         raise ValueError("Funzione di attivazione non valida")
 
-    # Inizializza gradienti per ogni layer
-    #Stiamo inizializzando i gradienti con zeri, ma con la stessa forma delle rispettive matrici/pesi
+    # stiamo inizializzando i gradienti con zeri, ma con la stessa forma delle rispettive matrici/pesi
     dW = [np.zeros_like(W_l) for W_l in W] # gradiente di E rispetto ai pesi per ogni layer
     db = [np.zeros_like(b_l) for b_l in b] # gradiente di E rispetto ai bias per ogni layer
 
     for i in range(m):
         activations = all_activations[i]
-        """ a_L = activations[L]  # output layer input (prima di softmax)
-        z_output = np.dot(W[L], a_L) + b[L]
-        phi = softmax(z_output) """
 
         # delta^{L+1}
         delta = phi[i] - Y[i]
 
-        # Gradiente per l'output layer
+        # gradiente per l'output layer
         dW[L] += np.outer(delta, activations[L])
         db[L] += delta
 
-        # Backpropagation per i layer nascosti
+        # backpropagation per i layer nascosti
         for l in reversed(range(L)):
             z = np.dot(W[l], activations[l]) + b[l]  # z^l
             da_dz = activation_deriv(z)              # g'(z^l)
@@ -79,7 +75,7 @@ def backpropagation(phi, Y, W, b, g, all_activations, m):
             dW[l] += np.outer(delta, activations[l])
             db[l] += delta
 
-    # Media sui batch
+    # media sui batch
     dW = [dw / m for dw in dW]
     db = [db_l / m for db_l in db]
     
@@ -93,14 +89,14 @@ def weight_initializer(neurons):
     W = []
     b = []
 
-    #costruzione delle matrici W per ogni livello, fissato vettore dei neuroni
+    # costruzione delle matrici W per ogni livello, fissato vettore dei neuroni
     for l in range(len(neurons) - 1):
-        W.append(np.random.randn(neurons[l+1], neurons[l]) * np.sqrt(2. / neurons[l])) #usiamo He initilization; POI DA FARE ANCHE CON XAVIER PER TANH
+        W.append(np.random.randn(neurons[l+1], neurons[l]) * np.sqrt(2. / neurons[l])) # usiamo He initilization
         b.append(np.zeros((neurons[l+1],)))
 
     return W, b
 
-#Versione generale per inizializazione dei pesi
+# versione generale per inizializazione dei pesi
 def general_weight_initializer(neurons, method):
     W = []
     b = []
@@ -124,7 +120,7 @@ def stochastic_gradient_with_momentum(dW, db, W, b, vW, vb, lam, k, loss_prev, l
 
     beta = 0.9
 
-    # Confronta la variazione della loss
+    # confronta la variazione della loss per determinare passo
     if abs(loss_curr - loss_prev) < epsilon:
         alfa = 1 / k  # diminishing stepsize
     else:
@@ -139,6 +135,7 @@ def stochastic_gradient_with_momentum(dW, db, W, b, vW, vb, lam, k, loss_prev, l
         else:
             raise ValueError("Tipo di regolarizzazione non supportato: usa 'l1' o 'l2'")
         
+        # algoritmo iterativo
         vW[l] = beta * vW[l] - alfa * (dW[l] + reg_term)
         vb[l] = beta * vb[l] - alfa * db[l]
 
@@ -147,16 +144,9 @@ def stochastic_gradient_with_momentum(dW, db, W, b, vW, vb, lam, k, loss_prev, l
 
     return W, b, vW, vb
 
+# calcola la cross-entropy loss con la regolarizzazione indicata da reg_type
+def compute_loss(phi, Y_true, W, lam, reg_type):
 
-def compute_loss(phi, Y_true, W, lam):
-    """
-    Calcola la cross-entropy loss con regolarizzazione L2.
-    
-    phi: output softmax della rete, shape (batch_size, num_classes)
-    Y_true: one-hot labels, shape (batch_size, num_classes)
-    W: lista dei pesi per ciascun layer
-    lam: coefficiente di regolarizzazione (lambda)
-    """
 
     phi = np.array(phi)
     Y_true = np.array(Y_true)
@@ -164,11 +154,14 @@ def compute_loss(phi, Y_true, W, lam):
     m = Y_true.shape[0]
     eps = 1e-8  # per evitare log(0)
 
-    # Cross-entropy loss
+    # cross-entropy loss
     loss_ce = -np.sum(Y_true * np.log(phi + eps)) / m
 
-    # L2 regularization: somma dei quadrati di tutti i pesi
-    loss_reg = lam * sum(np.sum(w ** 2) for w in W)
+    if(reg_type == 'l2'):
+        # L2 regularization: somma dei quadrati di tutti i pesi
+        loss_reg = lam * sum(np.sum(w ** 2) for w in W)
+    elif(reg_type == 'l1'):
+        # L1 regularization: somma dei valori assoluti
+        loss_reg = lam * sum(np.sum(np.abs(w)) for w in W)
 
-    # Totale
     return loss_ce + loss_reg

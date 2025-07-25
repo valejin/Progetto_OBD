@@ -6,11 +6,12 @@ from trainingFunctions import *
 from modelEvaluation import *
 from itertools import combinations
 
+# divide X in k fold
 def k_fold_division(X, Y, k=5):
     
     np.random.seed(42)
     m = X.shape[0]
-    idx = np.random.permutation(m)  # shuffle gli indici
+    idx = np.random.permutation(m)  # shuffle degli indici
     fold_size = m // k
 
     folds = []
@@ -24,15 +25,16 @@ def k_fold_division(X, Y, k=5):
 
     return folds
 
+# divide in k fold in base ai label per rendere i batch bilanciati
 def manual_stratified_k_fold(X, Y, k=5, seed=42):
     np.random.seed(seed)
     folds = []
 
-    # Trova le classi uniche
+    # trova le classi uniche
     classes = np.unique(Y)
     class_indices = {cls: np.where(Y == cls)[0] for cls in classes}
 
-    # Per ogni classe, shuffla e dividila in k blocchi
+    # per ogni classe, esegue shuffle e la divide in k blocchi
     class_folds = {cls: [] for cls in classes}
 
     for cls in classes:
@@ -46,7 +48,7 @@ def manual_stratified_k_fold(X, Y, k=5, seed=42):
             class_folds[cls].append(indices[current:current+size])
             current += size
 
-    # Ora crea i fold combinando in ogni fold una porzione di ogni classe
+    # crea i fold combinando in ogni fold una porzione di ogni classe
     for i in range(k):
         val_idx = np.concatenate([class_folds[cls][i] for cls in classes])
         train_idx = np.concatenate([np.concatenate(class_folds[cls][:i] + class_folds[cls][i+1:]) for cls in classes])
@@ -79,7 +81,7 @@ def cross_validation(X, Y, n_features, num_classes, inizialization, activation_f
 
                 Y_one_hot = np.eye(num_classes)[Y_train]
 
-                # Inizializzazione dei pesi e momenti
+                # inizializzazione dei pesi e momenti
                 W, b = general_weight_initializer(neurons, inizialization)
 
                 vW = [np.zeros_like(w) for w in W]
@@ -100,7 +102,7 @@ def cross_validation(X, Y, n_features, num_classes, inizialization, activation_f
 
                         phi, labels, activations = forward_pass(X_batch, W, b, activation_function, len(X_batch))
 
-                        loss_curr = compute_loss(phi, Y_batch, W, lambd)
+                        loss_curr = compute_loss(phi, Y_batch, W, lambd, regularization)
 
 
                         dW, db = backpropagation(phi, Y_batch, W, b, activation_function, activations, len(X_batch))
@@ -114,13 +116,11 @@ def cross_validation(X, Y, n_features, num_classes, inizialization, activation_f
                 acc, _, _, _ = evaluate_model(labels_val, Y_val)
                 val_accuracies.append(acc)
 
-            # Media delle performance su tutti i fold per questo lambda
+            # media delle performance su tutti i fold per questo lambda
             print("\nModello: ", neurons)
             print(f"λ={lambd} -> accuracy media: {np.mean(val_accuracies)}")
 
             all_mean_acc.append(np.mean(val_accuracies))
-
-    #plot_lambda_vs_accuracy(LAMBDA_VALUES_LIST, all_mean_acc)
 
     return all_models[np.argmax(all_mean_acc)]
 

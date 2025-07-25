@@ -1,6 +1,6 @@
 import numpy as np
 
-# Funzioni di attivazione
+# tutte le funzioni di attivazione
 def sigmoid(Z):
 
     A = 1 / (1 + np.exp(-Z))
@@ -22,7 +22,7 @@ def relu(Z):
 
 def softmax(Z):
 
-    Z = Z - np.max(Z)  # sottrai il max per stabilizzare l'esponenziale
+    Z = Z - np.max(Z)  # sottrae il max per stabilizzare l'esponenziale
     exp_Z = np.exp(Z)
     A = exp_Z / np.sum(exp_Z)
 
