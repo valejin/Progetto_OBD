@@ -101,6 +101,7 @@ def main():
     print("\n\n*---- PRESTAZIONI SU TEST SET ----*\n")
     phi, labels, activations = forward_pass(X_test, W, b, activation_function, len(X_test))
     accuracy, precision, recall, f1 = evaluate_model(labels, Y_test)
+    show_confusion_matrix(labels, Y_test)
 
 
 def print_menu(message):

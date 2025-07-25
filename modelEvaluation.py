@@ -5,22 +5,6 @@ import matplotlib.pyplot as plt
 
 def evaluate_model(phi_label, y):
 
-    #Confronto elemento per elemento e conteggio degli uguali
-    """ n_equal = np.sum(phi_label == y)
-
-    accuracy = (n_equal/len(y))*100
-
-    # precision = TP/TP+FP
-
-    # Confronta se entrambi sono 1 nella stessa posizione
-    TP = np.sum((phi_label == 1) & (y == 1))
-    FP = np.sum((phi_label == 1) & (y != 1))
-    FN = np.sum((phi_label != 1) & (y == 1))
-
-    precision = TP / (TP + FP) 
-    recall = TP / (TP + FN) """
-
-
     # Accuratezza generale
     accuracy = accuracy_score(y, phi_label)
 
